@@ -1,0 +1,11 @@
+{验证显示冒烟测试：只测试副图能否显示固定线、固定柱、固定文字}
+
+测试顶:2.20,COLORGRAY,DOTLINE;
+测试底:-0.90,COLORGRAY,DOTLINE;
+测试中:0.50,COLORYELLOW,DOTLINE;
+
+固定条件:=C>0;
+
+STICKLINE(固定条件,0.20,1.80,4,0),COLORRED;
+DRAWTEXT(固定条件,1.90,'测'),COLORYELLOW;
+
