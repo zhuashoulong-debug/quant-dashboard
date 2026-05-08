@@ -41,7 +41,7 @@
 - 各类 `generate-*.js`：只有需要重新生成或修改验证副图时再读。
 - 已明确不建议继续依赖的旧版/长版验证副图：只有排查历史问题时再读。
 
-当前主线应该是：验证副图 A 的源头层。A3a 普通上穿路径已经拆成 A3a1/A3a2/A3a3 三张短图；A3b1 首扩来源 mini 副图已经生成，下一步应先测试 A3b1，若显示稳定再进入 A3b2：蓝黄来源。
+当前主线应该是：验证副图 A 的源头层。A3a 普通上穿路径已经拆成 A3a1/A3a2/A3a3 三张短图；A3b1 首扩来源 mini 副图已经测试可显示，下一步进入 A3b2：蓝黄来源。
 ```
 
 ## 当前最重要状态
@@ -86,7 +86,7 @@
 - `validation-indicator-A3a1-upcross-mini-draft.txt`：普通上穿路径的上穿核对短图。
 - `validation-indicator-A3a2-break-bg-mini-draft.txt`：普通上穿路径的突破背景短图。
 - `validation-indicator-A3a3-upbreak-quality-mini-draft.txt`：普通上穿路径的温暴极质量短图。
-- `validation-indicator-A3b1-first-expand-mini-draft.txt`：首扩来源、首扩候选、周期许可、首扩启核对短图，待用户测试。
+- `validation-indicator-A3b1-first-expand-mini-draft.txt`：首扩来源、首扩候选、周期许可、首扩启核对短图，已测试可显示。
 
 不应作为当前定稿继续依赖的版本：
 
@@ -102,16 +102,16 @@
 
 ### 5. 下一步
 
-下一步应先测试：
-
-```text
-A3b1：首扩来源 mini 副图
-```
-
-如果 A3b1 显示稳定，再进入：
+下一步应进入：
 
 ```text
 A3b2：蓝黄来源
+```
+
+若后续发现 A3b1 在其他样本中后段显示不稳定，再拆成：
+
+```text
+A3b1a / A3b1b
 ```
 
 暂时不要继续纠缠 A3a 长图。A3a 已经收敛为三张短图：
