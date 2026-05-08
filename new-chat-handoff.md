@@ -34,12 +34,14 @@
 - validation-indicator-A3a1-upcross-mini-draft.txt：如果核对普通上穿路径是否发生有效上穿。
 - validation-indicator-A3a2-break-bg-mini-draft.txt：如果核对普通上穿路径是否具备突破背景。
 - validation-indicator-A3a3-upbreak-quality-mini-draft.txt：如果核对普通上穿路径是否进入温上/暴上/极上/风险源。
+- validation-indicator-A3b1-first-expand-mini-draft.txt：如果核对首扩来源、首扩候选、首扩周期许可和首扩启。
+- validation-indicator-index.md：如果需要查看当前哪些验证副图是主线、辅助排查、历史过渡或不建议依赖。
 
 一般不需要一上来读取：
 - 各类 `generate-*.js`：只有需要重新生成或修改验证副图时再读。
 - 已明确不建议继续依赖的旧版/长版验证副图：只有排查历史问题时再读。
 
-当前主线应该是：验证副图 A 的源头层，A3a 普通上穿路径已经拆成 A3a1/A3a2/A3a3 三张短图，下一步准备进入 A3b：首扩 / 蓝黄来源。
+当前主线应该是：验证副图 A 的源头层。A3a 普通上穿路径已经拆成 A3a1/A3a2/A3a3 三张短图；A3b1 首扩来源 mini 副图已经生成，下一步应先测试 A3b1，若显示稳定再进入 A3b2：蓝黄来源。
 ```
 
 ## 当前最重要状态
@@ -84,6 +86,7 @@
 - `validation-indicator-A3a1-upcross-mini-draft.txt`：普通上穿路径的上穿核对短图。
 - `validation-indicator-A3a2-break-bg-mini-draft.txt`：普通上穿路径的突破背景短图。
 - `validation-indicator-A3a3-upbreak-quality-mini-draft.txt`：普通上穿路径的温暴极质量短图。
+- `validation-indicator-A3b1-first-expand-mini-draft.txt`：首扩来源、首扩候选、周期许可、首扩启核对短图，待用户测试。
 
 不应作为当前定稿继续依赖的版本：
 
@@ -99,10 +102,16 @@
 
 ### 5. 下一步
 
-下一步应进入：
+下一步应先测试：
 
 ```text
-A3b：首扩 / 蓝黄来源
+A3b1：首扩来源 mini 副图
+```
+
+如果 A3b1 显示稳定，再进入：
+
+```text
+A3b2：蓝黄来源
 ```
 
 暂时不要继续纠缠 A3a 长图。A3a 已经收敛为三张短图：

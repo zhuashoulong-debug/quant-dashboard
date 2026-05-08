@@ -30,6 +30,7 @@ A3a 普通上穿路径已拆成 A3a1 / A3a2 / A3a3 三张短图。
 | `validation-indicator-A3a1-upcross-mini-draft.txt` | 45 | 当前主线 | 普通上穿路径：核对轨上、手工上穿、`CROSS(PCTB,1)`、浅绕过滤、有效上穿。 |
 | `validation-indicator-A3a2-break-bg-mini-draft.txt` | 133 | 当前主线 | 普通上穿路径：核对近挤、迟发、昨缩、今缩、突破背景。 |
 | `validation-indicator-A3a3-upbreak-quality-mini-draft.txt` | 167 | 当前主线 | 普通上穿路径：核对阳强、长上、量能、构上、温上 / 暴上 / 极上 / 风险源。 |
+| `validation-indicator-A3b1-first-expand-mini-draft.txt` | 236 | 当前主线待测 | 首扩来源：核对宽度许可、真正收缩、上轨趋势、带宽初扩、平台热阻断、首扩候选、周期许可、首扩启。 |
 
 ## 辅助排查副图
 
@@ -78,14 +79,15 @@ A3a 普通上穿路径已拆成 A3a1 / A3a2 / A3a3 三张短图。
   - `generate-validation-A3a1-upcross-mini.js`
   - `generate-validation-A3a2-break-bg-mini.js`
   - `generate-validation-A3a3-upbreak-quality-mini.js`
+  - `generate-validation-A3b1-first-expand-mini.js`
 - 历史调试脚本仅在需要复查生成过程时使用。
 - 后续进入 A3b 时，新脚本命名建议：
-  - `generate-validation-A3b1-first-expand-mini.js`
   - `generate-validation-A3b2-blue-yellow-source-mini.js`
 
 ## 下一步建议
 
 1. 先提交当前现场和本索引，作为整理前基线。
 2. 暂不移动旧文件，避免打断已有文档引用。
-3. 继续设计 A3b mini 副图。
-4. 等 A3b 稳定后，再决定是否建立 `archive/validation-indicators/` 归档目录。
+3. 用户先测试 `validation-indicator-A3b1-first-expand-mini-draft.txt`。
+4. 如果 A3b1 显示稳定，再继续设计 `A3b2：蓝黄来源 mini 副图`。
+5. 等 A3b 稳定后，再决定是否建立 `archive/validation-indicators/` 归档目录。
