@@ -303,6 +303,34 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     yellow_violent_source = violent_source & ~blue_quality_background
     blue_signal_source = blue_warm_source | blue_violent_source
     yellow_signal_source = yellow_warm_source | yellow_violent_source
+    first_expand_start = pd.Series(False, index=result.index)
+    speed_valid = pd.Series(False, index=result.index)
+    speed_after_running = pd.Series(False, index=result.index)
+    rush_valid = pd.Series(False, index=result.index)
+    # Permissive placeholders until the yellow permission layer is migrated.
+    yellow_display_permission = pd.Series(True, index=result.index)
+    yellow_fresh_permission = pd.Series(True, index=result.index)
+    blue_warm_valid = blue_warm_source & ~first_expand_start & ~speed_valid & ~speed_after_running
+    blue_violent_valid = blue_violent_source & ~first_expand_start
+    blue_valid = blue_warm_valid | blue_violent_valid
+    yellow_warm_valid = (
+        yellow_warm_source
+        & yellow_display_permission
+        & yellow_fresh_permission
+        & ~first_expand_start
+        & ~speed_valid
+        & ~speed_after_running
+    )
+    yellow_violent_valid = (
+        yellow_violent_source
+        & yellow_display_permission
+        & yellow_fresh_permission
+        & ~first_expand_start
+        & ~speed_valid
+        & ~speed_after_running
+    )
+    yellow_valid = yellow_warm_valid | yellow_violent_valid
+    effective_start_signal_pre = first_expand_start | speed_valid | blue_valid | rush_valid | yellow_valid
 
     result["warm_up_base"] = warm_up_base.fillna(False)
     result["warm_up"] = warm_up.fillna(False)
@@ -328,6 +356,19 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     result["yellow_violent_source"] = yellow_violent_source.fillna(False)
     result["blue_signal_source"] = blue_signal_source.fillna(False)
     result["yellow_signal_source"] = yellow_signal_source.fillna(False)
+    result["first_expand_start"] = first_expand_start.fillna(False)
+    result["speed_valid"] = speed_valid.fillna(False)
+    result["speed_after_running"] = speed_after_running.fillna(False)
+    result["rush_valid"] = rush_valid.fillna(False)
+    result["yellow_display_permission"] = yellow_display_permission.fillna(False)
+    result["yellow_fresh_permission"] = yellow_fresh_permission.fillna(False)
+    result["blue_warm_valid"] = blue_warm_valid.fillna(False)
+    result["blue_violent_valid"] = blue_violent_valid.fillna(False)
+    result["blue_valid"] = blue_valid.fillna(False)
+    result["yellow_warm_valid"] = yellow_warm_valid.fillna(False)
+    result["yellow_violent_valid"] = yellow_violent_valid.fillna(False)
+    result["yellow_valid"] = yellow_valid.fillna(False)
+    result["effective_start_signal_pre"] = effective_start_signal_pre.fillna(False)
 
     result["old_blue_squeeze_background"] = (
         ref(effective_squeeze).fillna(False)

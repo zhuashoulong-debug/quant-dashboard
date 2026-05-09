@@ -82,6 +82,23 @@ VALIDATION_VIEWS = [
             {"key": "yellow_violent_source", "label": "黄暴源", "kind": "bool"},
         ],
     },
+    {
+        "id": "effective",
+        "label": "有效层",
+        "description": "A3b2 有效层：观察蓝/黄来源进入有效信号前，被首扩、速度、黄色许可等条件压制的位置。",
+        "fields": [
+            {"key": "first_expand_start", "label": "首扩启", "kind": "bool"},
+            {"key": "speed_valid", "label": "速有效", "kind": "bool"},
+            {"key": "speed_after_running", "label": "速后运行", "kind": "bool"},
+            {"key": "yellow_display_permission", "label": "黄显示许可", "kind": "bool"},
+            {"key": "yellow_fresh_permission", "label": "黄新鲜许可", "kind": "bool"},
+            {"key": "blue_warm_valid", "label": "蓝温有效", "kind": "bool"},
+            {"key": "blue_violent_valid", "label": "蓝暴有效", "kind": "bool"},
+            {"key": "yellow_warm_valid", "label": "黄温有效", "kind": "bool"},
+            {"key": "yellow_violent_valid", "label": "黄暴有效", "kind": "bool"},
+            {"key": "effective_start_signal_pre", "label": "有效启动预", "kind": "bool"},
+        ],
+    },
 ]
 
 

@@ -667,7 +667,10 @@ def main() -> int:
         },
     )
     server = ThreadingHTTPServer((args.host, args.port), handler)
-    print(f"formula lab listening on http://{args.host}:{args.port}/")
+    try:
+        print(f"formula lab listening on http://{args.host}:{args.port}/", flush=True)
+    except OSError:
+        pass
     server.serve_forever()
     return 0
 
