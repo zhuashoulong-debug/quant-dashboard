@@ -99,6 +99,23 @@ VALIDATION_VIEWS = [
             {"key": "effective_start_signal_pre", "label": "有效启动预", "kind": "bool"},
         ],
     },
+    {
+        "id": "yellow_permission",
+        "label": "黄许可",
+        "description": "A3b2 黄色许可：对照候选占用、强信号占用和黄有效后的同段冷却，先观察结构再决定是否进主公式。",
+        "fields": [
+            {"key": "yellow_signal_source", "label": "黄源", "kind": "bool"},
+            {"key": "old_yellow_display_occupancy", "label": "候选占用", "kind": "bool"},
+            {"key": "old_candidate_cooling", "label": "候选冷却", "kind": "bool"},
+            {"key": "strong_track_occupancy", "label": "强占用", "kind": "bool"},
+            {"key": "near_strong_track_signal", "label": "近强占", "kind": "bool"},
+            {"key": "yellow_after_reset", "label": "黄后重置", "kind": "bool"},
+            {"key": "yellow_hard_cooling", "label": "硬冷却", "kind": "bool"},
+            {"key": "yellow_after_same_trend", "label": "同段强势", "kind": "bool"},
+            {"key": "yellow_self_permission", "label": "自身许可", "kind": "bool"},
+            {"key": "experimental_yellow_valid", "label": "实验黄有效", "kind": "bool"},
+        ],
+    },
 ]
 
 

@@ -40,6 +40,56 @@ def choose(condition: pd.Series, truthy: pd.Series | float, falsy: pd.Series | f
     return truthy_series.where(condition.fillna(False), falsy_series)
 
 
+def yellow_permission_layer(
+    yellow_candidate: pd.Series,
+    strong_track_occupancy: pd.Series,
+    reset_shape: pd.Series,
+    strong_trend_running: pd.Series,
+    hard_window: int = 8,
+    segment_window: int = 20,
+    strong_window: int = 8,
+) -> pd.DataFrame:
+    near_strong_track_signal = ref(rolling_count(strong_track_occupancy, strong_window), 1) > 0
+    last_yellow_index: int | None = None
+    rows: list[dict[str, bool]] = []
+
+    for position, index in enumerate(yellow_candidate.index):
+        bars_since_yellow = math.inf if last_yellow_index is None else position - last_yellow_index
+        time_reset = last_yellow_index is not None and bars_since_yellow > segment_window
+        after_reset = bool(reset_shape.loc[index]) or time_reset
+        hard_cooling = last_yellow_index is not None and bars_since_yellow <= hard_window
+        after_same_trend = (
+            last_yellow_index is not None
+            and bars_since_yellow <= segment_window
+            and bool(strong_trend_running.loc[index])
+            and not after_reset
+        )
+        self_permission = not hard_cooling and not after_same_trend
+        strong_permission = (not bool(near_strong_track_signal.loc[index])) or after_reset
+        display_permission = self_permission and strong_permission
+        yellow_valid = bool(yellow_candidate.loc[index]) and display_permission
+
+        rows.append(
+            {
+                "near_strong_track_signal": bool(near_strong_track_signal.loc[index]),
+                "yellow_time_reset": bool(time_reset),
+                "yellow_after_reset": bool(after_reset),
+                "yellow_hard_cooling": bool(hard_cooling),
+                "yellow_after_same_trend": bool(after_same_trend),
+                "yellow_self_permission": bool(self_permission),
+                "yellow_strong_permission": bool(strong_permission),
+                "yellow_display_permission": bool(display_permission),
+                "yellow_fresh_permission": bool(self_permission),
+                "experimental_yellow_valid": bool(yellow_valid),
+            }
+        )
+
+        if yellow_valid:
+            last_yellow_index = position
+
+    return pd.DataFrame(rows, index=yellow_candidate.index)
+
+
 def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     required = {"open", "high", "low", "close"}
     missing = required - set(data.columns)
@@ -307,12 +357,30 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     speed_valid = pd.Series(False, index=result.index)
     speed_after_running = pd.Series(False, index=result.index)
     rush_valid = pd.Series(False, index=result.index)
-    # Permissive placeholders until the yellow permission layer is migrated.
-    yellow_display_permission = pd.Series(True, index=result.index)
-    yellow_fresh_permission = pd.Series(True, index=result.index)
     blue_warm_valid = blue_warm_source & ~first_expand_start & ~speed_valid & ~speed_after_running
     blue_violent_valid = blue_violent_source & ~first_expand_start
     blue_valid = blue_warm_valid | blue_violent_valid
+    strong_track_occupancy = first_expand_start | speed_valid | rush_valid | blue_valid
+    yellow_candidate_valid = (
+        yellow_signal_source
+        & ~first_expand_start
+        & ~speed_valid
+        & ~speed_after_running
+    )
+    old_yellow_display_occupancy = yellow_signal_source
+    old_candidate_cooling = ref(rolling_count(old_yellow_display_occupancy, 8), 1) > 0
+    yellow_reset_pullback = pctb < 0.50
+    yellow_recontraction_reset = new_effective_squeeze | new_true_contraction
+    yellow_reset_shape = yellow_reset_pullback | yellow_recontraction_reset
+    strong_trend_running = (pctb > 0.90) & (close >= mid) & ~yellow_reset_shape
+    yellow_permissions = yellow_permission_layer(
+        yellow_candidate=yellow_candidate_valid.fillna(False),
+        strong_track_occupancy=strong_track_occupancy.fillna(False),
+        reset_shape=yellow_reset_shape.fillna(False),
+        strong_trend_running=strong_trend_running.fillna(False),
+    )
+    yellow_display_permission = yellow_permissions["yellow_display_permission"]
+    yellow_fresh_permission = yellow_permissions["yellow_fresh_permission"]
     yellow_warm_valid = (
         yellow_warm_source
         & yellow_display_permission
@@ -360,6 +428,16 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     result["speed_valid"] = speed_valid.fillna(False)
     result["speed_after_running"] = speed_after_running.fillna(False)
     result["rush_valid"] = rush_valid.fillna(False)
+    result = result.copy()
+    result["strong_track_occupancy"] = strong_track_occupancy.fillna(False)
+    result["yellow_candidate_valid"] = yellow_candidate_valid.fillna(False)
+    result["old_yellow_display_occupancy"] = old_yellow_display_occupancy.fillna(False)
+    result["old_candidate_cooling"] = old_candidate_cooling.fillna(False)
+    result["yellow_reset_pullback"] = yellow_reset_pullback.fillna(False)
+    result["yellow_recontraction_reset"] = yellow_recontraction_reset.fillna(False)
+    result["strong_trend_running"] = strong_trend_running.fillna(False)
+    for column in yellow_permissions.columns:
+        result[column] = yellow_permissions[column].fillna(False)
     result["yellow_display_permission"] = yellow_display_permission.fillna(False)
     result["yellow_fresh_permission"] = yellow_fresh_permission.fillna(False)
     result["blue_warm_valid"] = blue_warm_valid.fillna(False)

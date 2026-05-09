@@ -9,9 +9,9 @@ class ValidationViewTests(unittest.TestCase):
     def test_views_keep_old_subplots_consolidated(self) -> None:
         self.assertEqual(
             validation_view_ids(),
-            ["overview", "base", "background", "source", "blue_yellow", "effective"],
+            ["overview", "base", "background", "source", "blue_yellow", "effective", "yellow_permission"],
         )
-        self.assertLessEqual(len(VALIDATION_VIEWS), 6)
+        self.assertLessEqual(len(VALIDATION_VIEWS), 7)
 
     def test_every_view_has_small_named_field_list(self) -> None:
         for view in VALIDATION_VIEWS:
