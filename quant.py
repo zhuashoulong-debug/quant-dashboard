@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import yfinance as yf
 import streamlit as st
 import pandas as pd
@@ -60,6 +62,7 @@ if page == "策略回测":
             buy_price = 0
             portfolio = []
             trades = []
+            events = []
 
             for i in range(1, len(df)):
                 price = float(df["收盘"].iloc[i])
@@ -76,20 +79,62 @@ if page == "策略回测":
                 if shares > 0:
                     change = (price - buy_price) / buy_price * 100
                     if change <= -stop_loss:
+                        sell_qty = shares
                         cash += shares * price
                         trades.append({"日期": df.index[i], "操作": "止损", "价格": round(price,2), "数量": shares, "盈亏%": round(change,2)})
                         shares = 0
                         buy_price = 0
+                        events.append({
+                            "日期": df.index[i],
+                            "股票代码": stock_code,
+                            "事件类型": "卖出",
+                            "操作": "止损",
+                            "价格": round(price, 2),
+                            "数量": sell_qty,
+                            "盈亏%": round(change, 2),
+                            "现金": round(cash, 2),
+                            "持仓数量": shares,
+                            "总资产": round(cash + shares * price, 2),
+                            "触发原因": "跌幅达到止损比例",
+                        })
                     elif change >= take_profit:
+                        sell_qty = shares
                         cash += shares * price
                         trades.append({"日期": df.index[i], "操作": "止盈", "价格": round(price,2), "数量": shares, "盈亏%": round(change,2)})
                         shares = 0
                         buy_price = 0
+                        events.append({
+                            "日期": df.index[i],
+                            "股票代码": stock_code,
+                            "事件类型": "卖出",
+                            "操作": "止盈",
+                            "价格": round(price, 2),
+                            "数量": sell_qty,
+                            "盈亏%": round(change, 2),
+                            "现金": round(cash, 2),
+                            "持仓数量": shares,
+                            "总资产": round(cash + shares * price, 2),
+                            "触发原因": "涨幅达到止盈比例",
+                        })
                     elif sp > lp and s < l and rsi > rsi_sell:
+                        sell_qty = shares
                         cash += shares * price
                         trades.append({"日期": df.index[i], "操作": "均线+RSI卖", "价格": round(price,2), "数量": shares, "盈亏%": round(change,2)})
                         shares = 0
                         buy_price = 0
+                        events.append({
+                            "日期": df.index[i],
+                            "股票代码": stock_code,
+                            "事件类型": "卖出",
+                            "操作": "均线+RSI卖",
+                            "价格": round(price, 2),
+                            "数量": sell_qty,
+                            "盈亏%": round(change, 2),
+                            "现金": round(cash, 2),
+                            "持仓数量": shares,
+                            "总资产": round(cash + shares * price, 2),
+                            "触发原因": "短期均线下穿长期均线且RSI高于卖出阈值",
+                        })
 
                 # 买入条件：金叉 + RSI未超买 + MACD金叉
                 ma_cross = sp < lp and s > l
@@ -103,6 +148,19 @@ if page == "策略回测":
                         cash -= shares * price
                         buy_price = price
                         trades.append({"日期": df.index[i], "操作": "买入", "价格": round(price,2), "数量": shares, "盈亏%": 0})
+                        events.append({
+                            "日期": df.index[i],
+                            "股票代码": stock_code,
+                            "事件类型": "买入",
+                            "操作": "买入",
+                            "价格": round(price, 2),
+                            "数量": shares,
+                            "盈亏%": 0,
+                            "现金": round(cash, 2),
+                            "持仓数量": shares,
+                            "总资产": round(cash + shares * price, 2),
+                            "触发原因": "短期均线上穿长期均线且RSI低于买入阈值",
+                        })
 
                 portfolio.append(cash + shares * price)
 
@@ -116,6 +174,18 @@ if page == "策略回测":
             win_trades = len(sells[sells["盈亏%"] > 0]) if len(sells) > 0 else 0
             loss_trades = len(sells[sells["盈亏%"] <= 0]) if len(sells) > 0 else 0
 
+            output_dir = Path("bt_output")
+            output_dir.mkdir(exist_ok=True)
+            event_columns = ["日期", "股票代码", "事件类型", "操作", "价格", "数量", "盈亏%", "现金", "持仓数量", "总资产", "触发原因"]
+            events_df = pd.DataFrame(events, columns=event_columns)
+            events_df.to_csv(output_dir / "events.csv", index=False, encoding="utf-8-sig")
+            if len(events_df) > 0:
+                signal_summary = events_df["事件类型"].value_counts().reset_index()
+                signal_summary.columns = ["事件类型", "次数"]
+            else:
+                signal_summary = pd.DataFrame(columns=["事件类型", "次数"])
+            signal_summary.to_csv(output_dir / "signal_summary.csv", index=False, encoding="utf-8-sig")
+
             c1, c2, c3, c4 = st.columns(4)
             c1.metric("最终资产", "¥{:,.0f}".format(final_value), "{:+.2f}%".format(total_return))
             c2.metric("策略收益", "{:.2f}%".format(total_return))
@@ -126,6 +196,8 @@ if page == "策略回测":
             c5.metric("总交易笔数", str(len(trades)))
             c6.metric("盈利次数", str(win_trades))
             c7.metric("亏损次数", str(loss_trades))
+
+            st.success("已输出回测事件文件：bt_output/events.csv 和 bt_output/signal_summary.csv")
 
             st.subheader("资金曲线")
             st.line_chart(pd.DataFrame({"资金曲线": portfolio}, index=df.index[1:]))
