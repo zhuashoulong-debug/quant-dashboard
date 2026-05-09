@@ -19,9 +19,10 @@ def add_boll_pctb(
     upper = mid + width * std
     lower = mid - width * std
     band_width = upper - lower
+    pctb_denominator = band_width.where(band_width.abs() > 0.0001, 0.0001)
 
     result["boll_mid"] = mid
     result["boll_upper"] = upper
     result["boll_lower"] = lower
-    result["pctb"] = (close - lower) / band_width
+    result["pctb"] = (close - lower) / pctb_denominator
     return result

@@ -24,6 +24,15 @@ class IndicatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "close"):
             add_boll_pctb(pd.DataFrame({"open": [1, 2, 3]}))
 
+    def test_add_boll_pctb_handles_zero_bandwidth(self) -> None:
+        data = pd.DataFrame({"close": [10.0] * 20})
+
+        result = add_boll_pctb(data)
+        last = result.iloc[-1]
+
+        self.assertEqual(last["boll_mid"], 10.0)
+        self.assertEqual(last["pctb"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

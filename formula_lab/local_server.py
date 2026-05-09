@@ -134,7 +134,7 @@ HTML = """<!doctype html>
 
     aside {
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
       background: var(--panel);
     }
 
@@ -189,6 +189,50 @@ HTML = """<!doctype html>
       color: var(--text);
       font-size: 17px;
       overflow-wrap: anywhere;
+    }
+
+    .diagnostics {
+      padding: 14px 18px;
+      overflow: auto;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .diag-title {
+      margin: 0 0 10px;
+      color: #f4ead7;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .diag-grid {
+      display: grid;
+      gap: 7px;
+    }
+
+    .diag-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 46px;
+      align-items: center;
+      gap: 8px;
+      min-height: 26px;
+      border-bottom: 1px solid #242824;
+    }
+
+    .diag-name {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .diag-state {
+      color: #7f8580;
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .diag-state.on {
+      color: var(--green);
     }
 
     .log {
@@ -257,6 +301,10 @@ HTML = """<!doctype html>
         <div class="metric"><span>成交额</span><strong id="amount">--</strong></div>
         <div class="metric"><span>日期</span><strong id="lastDate">--</strong></div>
       </section>
+      <section class="diagnostics">
+        <h2 class="diag-title" id="diagTitle">断点条件</h2>
+        <div class="diag-grid" id="diagnostics"></div>
+      </section>
       <section class="log" id="log"></section>
     </aside>
   </main>
@@ -267,6 +315,10 @@ HTML = """<!doctype html>
     const endInput = document.getElementById("end");
     const loadButton = document.getElementById("load");
     const log = document.getElementById("log");
+    const diagnostics = document.getElementById("diagnostics");
+    const diagTitle = document.getElementById("diagTitle");
+    let currentRows = [];
+    let currentPayload = null;
 
     function todayText() {
       const d = new Date();
@@ -289,8 +341,54 @@ HTML = """<!doctype html>
       log.innerHTML = `<span class="${tone}">${text}</span>`;
     }
 
+    function truthy(value) {
+      return value === true || value === 1;
+    }
+
+    function conditionRow(label, key, row) {
+      const active = truthy(row[key]);
+      return `
+        <div class="diag-row">
+          <span class="diag-name" title="${label}">${label}</span>
+          <span class="diag-state ${active ? "on" : ""}">${active ? "是" : "否"}</span>
+        </div>
+      `;
+    }
+
+    function renderDiagnostics(row) {
+      diagTitle.textContent = `断点条件 ${row.date}`;
+      const fields = [
+        ["有效上穿1", "effective_cross_1"],
+        ["浅绕回上穿", "shallow_recross"],
+        ["旧近挤", "old_near_squeeze"],
+        ["旧昨缩", "old_yesterday_contraction"],
+        ["旧今缩", "old_today_contraction"],
+        ["旧突破背景", "old_breakthrough_background"],
+        ["新近挤", "new_near_squeeze"],
+        ["新迟发", "new_late_squeeze"],
+        ["新昨缩", "new_yesterday_contraction"],
+        ["新今缩", "new_today_contraction"],
+        ["新突破背景", "new_breakthrough_background"],
+        ["旧蓝挤压背景", "old_blue_squeeze_background"],
+      ];
+      diagnostics.innerHTML = fields.map(([label, key]) => conditionRow(label, key, row)).join("");
+    }
+
+    function renderSide(payload, row) {
+      document.getElementById("stockCode").textContent = payload.stock.code;
+      document.getElementById("stockName").textContent = payload.stock.name || payload.stock.code;
+      document.getElementById("closePrice").textContent = fixed(row.close, 2);
+      document.getElementById("pctb").textContent = fixed(row.pctb, 3);
+      document.getElementById("boll").textContent = fixed(row.boll_mid, 2);
+      document.getElementById("amount").textContent = amountText(row.amount);
+      document.getElementById("lastDate").textContent = row.date;
+      renderDiagnostics(row);
+    }
+
     function render(payload) {
       const rows = payload.data;
+      currentRows = rows;
+      currentPayload = payload;
       const dates = rows.map((row) => row.date);
       const kline = rows.map((row) => [row.open, row.close, row.low, row.high]);
       const volume = rows.map((row) => row.volume);
@@ -300,13 +398,7 @@ HTML = """<!doctype html>
       const pctb = rows.map((row) => row.pctb);
       const last = rows[rows.length - 1];
 
-      document.getElementById("stockCode").textContent = payload.stock.code;
-      document.getElementById("stockName").textContent = payload.stock.name || payload.stock.code;
-      document.getElementById("closePrice").textContent = fixed(last.close, 2);
-      document.getElementById("pctb").textContent = fixed(last.pctb, 3);
-      document.getElementById("boll").textContent = fixed(last.boll_mid, 2);
-      document.getElementById("amount").textContent = amountText(last.amount);
-      document.getElementById("lastDate").textContent = last.date;
+      renderSide(payload, last);
 
       chart.setOption({
         backgroundColor: "#111111",
@@ -397,6 +489,11 @@ HTML = """<!doctype html>
     }
 
     window.addEventListener("resize", () => chart.resize());
+    chart.on("click", (params) => {
+      if (!currentPayload || !currentRows.length || params.dataIndex === undefined) return;
+      const row = currentRows[params.dataIndex];
+      if (row) renderSide(currentPayload, row);
+    });
     controls.addEventListener("submit", loadData);
     endInput.value = todayText();
     loadData();

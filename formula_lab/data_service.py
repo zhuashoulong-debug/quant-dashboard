@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from formula_lab.akshare_daily import cache_path, fetch_qfq_daily, write_daily_cache
-from formula_lab.indicators import add_boll_pctb
+from formula_lab.a3b2b1 import add_a3b2b1_backgrounds
 from formula_lab.stock_pool import StockItem, read_stock_pool, select_stock
 
 
@@ -46,4 +46,4 @@ def load_daily_with_indicators(
         cache_root=cache_root,
         refresh=refresh,
     )
-    return add_boll_pctb(data)
+    return add_a3b2b1_backgrounds(data)
