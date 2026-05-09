@@ -43,6 +43,18 @@ def to_akshare_symbol(code: str) -> str:
     return normalize_stock_code(code)
 
 
+def to_prefixed_market_symbol(code: str) -> str:
+    """Convert a six digit A-share code to sh/sz/bj-prefixed symbols."""
+    normalized = normalize_stock_code(code)
+    if normalized.startswith(("60", "68", "90")):
+        return f"sh{normalized}"
+    if normalized.startswith(("00", "30", "20")):
+        return f"sz{normalized}"
+    if normalized.startswith(("43", "83", "87", "92")):
+        return f"bj{normalized}"
+    raise ValueError(f"cannot infer exchange for stock code: {code!r}")
+
+
 def read_stock_pool(path: str | Path, sheet_name: str | None = None) -> list[StockItem]:
     workbook = load_workbook(Path(path), read_only=True, data_only=True)
     try:

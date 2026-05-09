@@ -28,7 +28,13 @@ def load_or_fetch_daily(
         data = pd.read_csv(path, parse_dates=["date"])
     else:
         data = fetch_qfq_daily(stock, start_date=start_date, end_date=end_date)
-        write_daily_cache(data, path)
+        write_daily_cache(
+            data,
+            path,
+            stock=stock,
+            start_date=start_date,
+            end_date=end_date,
+        )
     return data
 
 

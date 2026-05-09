@@ -258,6 +258,24 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
 
     breakthrough_background = result["new_breakthrough_background"]
     deep_limit = 0.30
+    pre_start_relative_high = safe_divide(ref(bandwidth), previous_effective_high_width)
+    platform_hot_state = pd.Series(False, index=result.index)
+    mid_contraction_breakthrough = pd.Series(False, index=result.index)
+    blue_compression_quality = (
+        (previous_width_ratio < 1.05)
+        & (pre_start_relative_high < 0.70)
+        & ~pre_start_hold_width
+        & ~previous_width_near_high
+        & ~platform_hot_state
+    )
+    blue_squeeze_background = new_effective_squeeze
+    blue_contraction_background = ref(new_true_contraction).fillna(False) | new_true_contraction | mid_contraction_breakthrough
+    yesterday_contraction_breakthrough = ref(new_true_contraction).fillna(False)
+    blue_quality_background = (
+        blue_squeeze_background
+        | (blue_contraction_background & contraction_process)
+        | yesterday_contraction_breakthrough
+    ) & blue_compression_quality
     warm_up_base = (
         effective_cross_1
         & breakthrough_background
@@ -277,6 +295,14 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     extreme_up_raw = breakthrough_background & (ref(pctb) < 1) & (pctb >= 1 + deep_limit)
     extreme_up = extreme_up_raw & (large_amount | structure_break_up) & bullish_strong & ~long_upper_shadow
     extreme_up_risk = extreme_up_raw & (long_upper_shadow | huge_amount)
+    warm_source = warm_up
+    violent_source = violent_up
+    blue_warm_source = warm_source & blue_quality_background
+    blue_violent_source = violent_source & blue_quality_background
+    yellow_warm_source = warm_source & ~blue_quality_background
+    yellow_violent_source = violent_source & ~blue_quality_background
+    blue_signal_source = blue_warm_source | blue_violent_source
+    yellow_signal_source = yellow_warm_source | yellow_violent_source
 
     result["warm_up_base"] = warm_up_base.fillna(False)
     result["warm_up"] = warm_up.fillna(False)
@@ -286,6 +312,22 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     result["extreme_up_raw"] = extreme_up_raw.fillna(False)
     result["extreme_up"] = extreme_up.fillna(False)
     result["extreme_up_risk"] = extreme_up_risk.fillna(False)
+    result["pre_start_relative_high"] = pre_start_relative_high
+    result["platform_hot_state"] = platform_hot_state.fillna(False)
+    result["mid_contraction_breakthrough"] = mid_contraction_breakthrough.fillna(False)
+    result["blue_compression_quality"] = blue_compression_quality.fillna(False)
+    result["blue_squeeze_background"] = blue_squeeze_background.fillna(False)
+    result["blue_contraction_background"] = blue_contraction_background.fillna(False)
+    result["yesterday_contraction_breakthrough"] = yesterday_contraction_breakthrough.fillna(False)
+    result["blue_quality_background"] = blue_quality_background.fillna(False)
+    result["warm_source"] = warm_source.fillna(False)
+    result["violent_source"] = violent_source.fillna(False)
+    result["blue_warm_source"] = blue_warm_source.fillna(False)
+    result["blue_violent_source"] = blue_violent_source.fillna(False)
+    result["yellow_warm_source"] = yellow_warm_source.fillna(False)
+    result["yellow_violent_source"] = yellow_violent_source.fillna(False)
+    result["blue_signal_source"] = blue_signal_source.fillna(False)
+    result["yellow_signal_source"] = yellow_signal_source.fillna(False)
 
     result["old_blue_squeeze_background"] = (
         ref(effective_squeeze).fillna(False)

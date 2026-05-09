@@ -65,6 +65,23 @@ VALIDATION_VIEWS = [
             {"key": "extreme_up_risk", "label": "极上险", "kind": "bool"},
         ],
     },
+    {
+        "id": "blue_yellow",
+        "label": "蓝黄",
+        "description": "合并旧 A3b2：判断同样上穿来源应进入蓝背景，还是退到黄色来源。",
+        "fields": [
+            {"key": "previous_width_ratio", "label": "启动前宽比", "kind": "number", "digits": 3},
+            {"key": "pre_start_relative_high", "label": "启动前相高", "kind": "number", "digits": 3},
+            {"key": "blue_compression_quality", "label": "蓝压缩质量", "kind": "bool"},
+            {"key": "blue_squeeze_background", "label": "蓝挤压背景", "kind": "bool"},
+            {"key": "blue_contraction_background", "label": "蓝收缩背景", "kind": "bool"},
+            {"key": "blue_quality_background", "label": "蓝优质背景", "kind": "bool"},
+            {"key": "blue_warm_source", "label": "蓝温源", "kind": "bool"},
+            {"key": "blue_violent_source", "label": "蓝暴源", "kind": "bool"},
+            {"key": "yellow_warm_source", "label": "黄温源", "kind": "bool"},
+            {"key": "yellow_violent_source", "label": "黄暴源", "kind": "bool"},
+        ],
+    },
 ]
 
 

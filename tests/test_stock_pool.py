@@ -11,6 +11,7 @@ from formula_lab.stock_pool import (
     read_stock_pool,
     select_stock,
     to_akshare_symbol,
+    to_prefixed_market_symbol,
     to_ts_code,
 )
 
@@ -22,6 +23,8 @@ class StockPoolTests(unittest.TestCase):
 
     def test_code_conversions(self) -> None:
         self.assertEqual(to_akshare_symbol("002222"), "002222")
+        self.assertEqual(to_prefixed_market_symbol("002222"), "sz002222")
+        self.assertEqual(to_prefixed_market_symbol("688300"), "sh688300")
         self.assertEqual(to_ts_code("002222"), "002222.SZ")
         self.assertEqual(to_ts_code("688300"), "688300.SH")
 
