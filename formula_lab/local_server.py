@@ -12,6 +12,7 @@ import pandas as pd
 
 from formula_lab.data_service import load_daily_with_indicators, stock_from_pool
 from formula_lab.stock_pool import normalize_stock_code, read_stock_pool
+from formula_lab.validation_views import VALIDATION_VIEWS
 
 
 HTML = """<!doctype html>
@@ -204,6 +205,35 @@ HTML = """<!doctype html>
       font-weight: 700;
     }
 
+    .view-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .view-tab {
+      height: 28px;
+      border: 1px solid #33382f;
+      background: #121512;
+      color: var(--muted);
+      padding: 0 8px;
+      text-align: center;
+    }
+
+    .view-tab.active {
+      border-color: #6d612d;
+      background: #29240f;
+      color: #ffe36c;
+    }
+
+    .diag-desc {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
     .diag-grid {
       display: grid;
       gap: 7px;
@@ -233,6 +263,11 @@ HTML = """<!doctype html>
 
     .diag-state.on {
       color: var(--green);
+    }
+
+    .diag-state.num {
+      color: #f3e9c0;
+      font-variant-numeric: tabular-nums;
     }
 
     .log {
@@ -303,6 +338,8 @@ HTML = """<!doctype html>
       </section>
       <section class="diagnostics">
         <h2 class="diag-title" id="diagTitle">断点条件</h2>
+        <div class="view-tabs" id="viewTabs"></div>
+        <p class="diag-desc" id="diagDesc"></p>
         <div class="diag-grid" id="diagnostics"></div>
       </section>
       <section class="log" id="log"></section>
@@ -317,8 +354,12 @@ HTML = """<!doctype html>
     const log = document.getElementById("log");
     const diagnostics = document.getElementById("diagnostics");
     const diagTitle = document.getElementById("diagTitle");
+    const diagDesc = document.getElementById("diagDesc");
+    const viewTabs = document.getElementById("viewTabs");
     let currentRows = [];
     let currentPayload = null;
+    let currentRow = null;
+    let currentViewId = "overview";
 
     function todayText() {
       const d = new Date();
@@ -345,33 +386,41 @@ HTML = """<!doctype html>
       return value === true || value === 1;
     }
 
-    function conditionRow(label, key, row) {
-      const active = truthy(row[key]);
+    function conditionRow(field, row) {
+      const value = row[field.key];
+      if (field.kind === "number") {
+        return `
+          <div class="diag-row">
+            <span class="diag-name" title="${field.label}">${field.label}</span>
+            <span class="diag-state num">${fixed(value, field.digits ?? 2)}</span>
+          </div>
+        `;
+      }
+      const active = truthy(value);
       return `
         <div class="diag-row">
-          <span class="diag-name" title="${label}">${label}</span>
+          <span class="diag-name" title="${field.label}">${field.label}</span>
           <span class="diag-state ${active ? "on" : ""}">${active ? "是" : "否"}</span>
         </div>
       `;
     }
 
+    function activeView() {
+      return currentPayload?.views?.find((view) => view.id === currentViewId) || currentPayload?.views?.[0];
+    }
+
+    function renderViewTabs() {
+      const views = currentPayload?.views || [];
+      viewTabs.innerHTML = views.map((view) => `
+        <button class="view-tab ${view.id === currentViewId ? "active" : ""}" data-view="${view.id}" type="button">${view.label}</button>
+      `).join("");
+    }
+
     function renderDiagnostics(row) {
-      diagTitle.textContent = `断点条件 ${row.date}`;
-      const fields = [
-        ["有效上穿1", "effective_cross_1"],
-        ["浅绕回上穿", "shallow_recross"],
-        ["旧近挤", "old_near_squeeze"],
-        ["旧昨缩", "old_yesterday_contraction"],
-        ["旧今缩", "old_today_contraction"],
-        ["旧突破背景", "old_breakthrough_background"],
-        ["新近挤", "new_near_squeeze"],
-        ["新迟发", "new_late_squeeze"],
-        ["新昨缩", "new_yesterday_contraction"],
-        ["新今缩", "new_today_contraction"],
-        ["新突破背景", "new_breakthrough_background"],
-        ["旧蓝挤压背景", "old_blue_squeeze_background"],
-      ];
-      diagnostics.innerHTML = fields.map(([label, key]) => conditionRow(label, key, row)).join("");
+      const view = activeView();
+      diagTitle.textContent = `${view?.label || "断点条件"} ${row.date}`;
+      diagDesc.textContent = view?.description || "";
+      diagnostics.innerHTML = (view?.fields || []).map((field) => conditionRow(field, row)).join("");
     }
 
     function renderSide(payload, row) {
@@ -382,6 +431,8 @@ HTML = """<!doctype html>
       document.getElementById("boll").textContent = fixed(row.boll_mid, 2);
       document.getElementById("amount").textContent = amountText(row.amount);
       document.getElementById("lastDate").textContent = row.date;
+      currentRow = row;
+      renderViewTabs();
       renderDiagnostics(row);
     }
 
@@ -494,6 +545,12 @@ HTML = """<!doctype html>
       const row = currentRows[params.dataIndex];
       if (row) renderSide(currentPayload, row);
     });
+    viewTabs.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-view]");
+      if (!button || !currentRow) return;
+      currentViewId = button.dataset.view;
+      renderSide(currentPayload, currentRow);
+    });
     controls.addEventListener("submit", loadData);
     endInput.value = todayText();
     loadData();
@@ -566,6 +623,7 @@ class FormulaLabHandler(BaseHTTPRequestHandler):
                     "stock": stock.__dict__,
                     "source": "akshare.stock_zh_a_hist",
                     "adjust": "qfq",
+                    "views": VALIDATION_VIEWS,
                     "data": _records(data),
                 }
             )

@@ -41,21 +41,51 @@ def choose(condition: pd.Series, truthy: pd.Series | float, falsy: pd.Series | f
 
 
 def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
-    required = {"high", "low", "close"}
+    required = {"open", "high", "low", "close"}
     missing = required - set(data.columns)
     if missing:
         raise ValueError(f"daily data missing columns: {', '.join(sorted(missing))}")
 
     result = add_boll_pctb(data)
+    open_ = result["open"].astype(float)
     close = result["close"].astype(float)
     high = result["high"].astype(float)
     low = result["low"].astype(float)
+    if "amount" in result.columns:
+        amount = result["amount"].astype(float)
+    elif "volume" in result.columns:
+        amount = result["volume"].astype(float) * close * 100
+    else:
+        amount = pd.Series(0.0, index=result.index)
     prev_close = ref(close)
 
     mid = result["boll_mid"]
     upper = result["boll_upper"]
     lower = result["boll_lower"]
     pctb = result["pctb"]
+
+    price_range = (high - low).clip(lower=0.0001)
+    entity = (close - open_).abs()
+    body_ratio = entity / price_range
+    entity_high = pd.concat([close, open_], axis=1).max(axis=1)
+    entity_low = pd.concat([close, open_], axis=1).min(axis=1)
+    upper_shadow_ratio = (high - entity_high) / price_range
+    lower_shadow_ratio = (entity_low - low) / price_range
+    close_position = (close - low) / price_range
+    bullish_strong = (close > open_) & (body_ratio >= 0.45)
+    long_upper_shadow = upper_shadow_ratio >= 0.45
+    obvious_long_upper_shadow = upper_shadow_ratio >= 0.55
+    extreme_long_upper_shadow = upper_shadow_ratio >= 0.65
+
+    amount_ma20 = amount.rolling(20, min_periods=1).mean()
+    has_amount = (amount > 0) & (amount_ma20 > 0)
+    amount_ratio = safe_divide(amount, amount_ma20)
+    warm_amount = has_amount & (amount >= amount_ma20)
+    large_amount = has_amount & (amount >= amount_ma20 * 1.2)
+    shrinking_amount = has_amount & (amount <= amount_ma20 * 0.8)
+    huge_amount = has_amount & (amount >= amount_ma20 * 1.8)
+    structure_break_up = close > ref(entity_high.rolling(20, min_periods=1).max())
+    structure_break_down = close < ref(entity_low.rolling(20, min_periods=1).min())
 
     tr = pd.concat(
         [
@@ -163,6 +193,25 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
 
     result["tr"] = tr
     result["atr20"] = atr
+    result["price_range"] = price_range
+    result["body_ratio"] = body_ratio
+    result["upper_shadow_ratio"] = upper_shadow_ratio
+    result["lower_shadow_ratio"] = lower_shadow_ratio
+    result["close_position"] = close_position
+    result["bullish_strong"] = bullish_strong.fillna(False)
+    result["long_upper_shadow"] = long_upper_shadow.fillna(False)
+    result["obvious_long_upper_shadow"] = obvious_long_upper_shadow.fillna(False)
+    result["extreme_long_upper_shadow"] = extreme_long_upper_shadow.fillna(False)
+    result["amount_ma20"] = amount_ma20
+    result["amount_ratio"] = amount_ratio
+    result["warm_amount"] = warm_amount.fillna(False)
+    result["large_amount"] = large_amount.fillna(False)
+    result["shrinking_amount"] = shrinking_amount.fillna(False)
+    result["huge_amount"] = huge_amount.fillna(False)
+    result["entity_high"] = entity_high
+    result["entity_low"] = entity_low
+    result["structure_break_up"] = structure_break_up.fillna(False)
+    result["structure_break_down"] = structure_break_down.fillna(False)
     result["keltner_upper"] = keltner_upper
     result["keltner_lower"] = keltner_lower
     result["squeeze"] = squeeze.fillna(False)
@@ -206,6 +255,37 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
         | result["new_yesterday_contraction"]
         | result["new_today_contraction"]
     )
+
+    breakthrough_background = result["new_breakthrough_background"]
+    deep_limit = 0.30
+    warm_up_base = (
+        effective_cross_1
+        & breakthrough_background
+        & (pctb < 1.10)
+        & (ref(pctb) < 1)
+    )
+    warm_up = warm_up_base & (warm_amount | structure_break_up) & ~long_upper_shadow
+    violent_up_raw = (
+        effective_cross_1
+        & breakthrough_background
+        & (ref(pctb) < 1)
+        & (pctb >= 1.10)
+        & (pctb < 1 + deep_limit)
+    )
+    violent_up = violent_up_raw & (large_amount | structure_break_up) & bullish_strong & ~long_upper_shadow
+    violent_up_risk = violent_up_raw & long_upper_shadow
+    extreme_up_raw = breakthrough_background & (ref(pctb) < 1) & (pctb >= 1 + deep_limit)
+    extreme_up = extreme_up_raw & (large_amount | structure_break_up) & bullish_strong & ~long_upper_shadow
+    extreme_up_risk = extreme_up_raw & (long_upper_shadow | huge_amount)
+
+    result["warm_up_base"] = warm_up_base.fillna(False)
+    result["warm_up"] = warm_up.fillna(False)
+    result["violent_up_raw"] = violent_up_raw.fillna(False)
+    result["violent_up"] = violent_up.fillna(False)
+    result["violent_up_risk"] = violent_up_risk.fillna(False)
+    result["extreme_up_raw"] = extreme_up_raw.fillna(False)
+    result["extreme_up"] = extreme_up.fillna(False)
+    result["extreme_up_risk"] = extreme_up_risk.fillna(False)
 
     result["old_blue_squeeze_background"] = (
         ref(effective_squeeze).fillna(False)

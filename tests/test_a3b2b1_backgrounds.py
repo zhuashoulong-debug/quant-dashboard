@@ -32,7 +32,18 @@ class A3b2b1BackgroundTests(unittest.TestCase):
         result = add_a3b2b1_backgrounds(make_cross_sample())
 
         expected_columns = {
+            "body_ratio",
+            "upper_shadow_ratio",
+            "amount_ratio",
+            "bullish_strong",
+            "long_upper_shadow",
+            "large_amount",
+            "structure_break_up",
             "effective_cross_1",
+            "warm_up_base",
+            "warm_up",
+            "violent_up",
+            "violent_up_risk",
             "diagnostic_k",
             "old_near_squeeze",
             "old_breakthrough_background",
