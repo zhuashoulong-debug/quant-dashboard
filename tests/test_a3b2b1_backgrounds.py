@@ -62,8 +62,12 @@ class A3b2b1BackgroundTests(unittest.TestCase):
             "yellow_recontraction_reset",
             "strong_trend_running",
             "near_strong_track_signal",
+            "yellow_reset_after_signal",
             "yellow_time_reset",
             "yellow_after_reset",
+            "strong_reset_after_signal",
+            "strong_time_reset",
+            "strong_after_reset",
             "yellow_hard_cooling",
             "yellow_after_same_trend",
             "yellow_self_permission",
@@ -93,13 +97,14 @@ class A3b2b1BackgroundTests(unittest.TestCase):
     def test_yellow_permission_layer_blocks_same_segment_repeats(self) -> None:
         yellow_candidate = pd.Series([False, True, True, False, True, False, True])
         strong_track_occupancy = pd.Series([False] * len(yellow_candidate))
-        reset_shape = pd.Series([False] * len(yellow_candidate))
+        reset_event = pd.Series([False] * len(yellow_candidate))
         strong_trend_running = pd.Series([True] * len(yellow_candidate))
 
         result = yellow_permission_layer(
             yellow_candidate=yellow_candidate,
             strong_track_occupancy=strong_track_occupancy,
-            reset_shape=reset_shape,
+            yellow_reset_event=reset_event,
+            strong_reset_event=reset_event,
             strong_trend_running=strong_trend_running,
             hard_window=2,
             segment_window=4,
@@ -115,26 +120,53 @@ class A3b2b1BackgroundTests(unittest.TestCase):
         self.assertTrue(result.iloc[6]["experimental_yellow_valid"])
 
     def test_yellow_permission_layer_needs_reset_after_recent_strong_signal(self) -> None:
-        yellow_candidate = pd.Series([False, False, True, True])
-        strong_track_occupancy = pd.Series([True, False, False, False])
-        reset_shape = pd.Series([False, False, False, True])
-        strong_trend_running = pd.Series([False, False, False, False])
+        yellow_candidate = pd.Series([False, True, True])
+        strong_track_occupancy = pd.Series([True, False, False])
+        reset_event = pd.Series([False, True, False])
+        strong_trend_running = pd.Series([False, False, False])
 
         result = yellow_permission_layer(
             yellow_candidate=yellow_candidate,
             strong_track_occupancy=strong_track_occupancy,
-            reset_shape=reset_shape,
+            yellow_reset_event=reset_event,
+            strong_reset_event=reset_event,
             strong_trend_running=strong_trend_running,
             hard_window=1,
             segment_window=4,
             strong_window=3,
         )
 
-        self.assertTrue(result.iloc[2]["near_strong_track_signal"])
-        self.assertFalse(result.iloc[2]["yellow_strong_permission"])
+        self.assertTrue(result.iloc[1]["near_strong_track_signal"])
+        self.assertFalse(result.iloc[1]["strong_after_reset"])
+        self.assertFalse(result.iloc[1]["yellow_strong_permission"])
+        self.assertFalse(result.iloc[1]["experimental_yellow_valid"])
+        self.assertTrue(result.iloc[2]["strong_reset_after_signal"])
+        self.assertTrue(result.iloc[2]["yellow_strong_permission"])
+        self.assertTrue(result.iloc[2]["experimental_yellow_valid"])
+
+    def test_yellow_permission_layer_ignores_same_bar_yellow_reset(self) -> None:
+        yellow_candidate = pd.Series([False, True, True, True])
+        strong_track_occupancy = pd.Series([False] * len(yellow_candidate))
+        yellow_reset_event = pd.Series([False, False, True, False])
+        strong_reset_event = pd.Series([False] * len(yellow_candidate))
+        strong_trend_running = pd.Series([True] * len(yellow_candidate))
+
+        result = yellow_permission_layer(
+            yellow_candidate=yellow_candidate,
+            strong_track_occupancy=strong_track_occupancy,
+            yellow_reset_event=yellow_reset_event,
+            strong_reset_event=strong_reset_event,
+            strong_trend_running=strong_trend_running,
+            hard_window=0,
+            segment_window=4,
+            strong_window=2,
+        )
+
+        self.assertTrue(result.iloc[1]["experimental_yellow_valid"])
+        self.assertFalse(result.iloc[2]["yellow_reset_after_signal"])
+        self.assertTrue(result.iloc[2]["yellow_after_same_trend"])
         self.assertFalse(result.iloc[2]["experimental_yellow_valid"])
-        self.assertTrue(result.iloc[3]["yellow_after_reset"])
-        self.assertTrue(result.iloc[3]["yellow_strong_permission"])
+        self.assertTrue(result.iloc[3]["yellow_reset_after_signal"])
         self.assertTrue(result.iloc[3]["experimental_yellow_valid"])
 
 

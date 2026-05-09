@@ -43,7 +43,8 @@ def choose(condition: pd.Series, truthy: pd.Series | float, falsy: pd.Series | f
 def yellow_permission_layer(
     yellow_candidate: pd.Series,
     strong_track_occupancy: pd.Series,
-    reset_shape: pd.Series,
+    yellow_reset_event: pd.Series,
+    strong_reset_event: pd.Series,
     strong_trend_running: pd.Series,
     hard_window: int = 8,
     segment_window: int = 20,
@@ -51,12 +52,28 @@ def yellow_permission_layer(
 ) -> pd.DataFrame:
     near_strong_track_signal = ref(rolling_count(strong_track_occupancy, strong_window), 1) > 0
     last_yellow_index: int | None = None
+    last_yellow_reset_index: int | None = None
+    last_strong_index: int | None = None
+    last_strong_reset_index: int | None = None
     rows: list[dict[str, bool]] = []
 
     for position, index in enumerate(yellow_candidate.index):
         bars_since_yellow = math.inf if last_yellow_index is None else position - last_yellow_index
+        bars_since_strong = math.inf if last_strong_index is None else position - last_strong_index
         time_reset = last_yellow_index is not None and bars_since_yellow > segment_window
-        after_reset = bool(reset_shape.loc[index]) or time_reset
+        yellow_reset_after_signal = (
+            last_yellow_index is not None
+            and last_yellow_reset_index is not None
+            and last_yellow_reset_index > last_yellow_index
+        )
+        after_reset = yellow_reset_after_signal or time_reset
+        strong_reset_after_signal = (
+            last_strong_index is not None
+            and last_strong_reset_index is not None
+            and last_strong_reset_index > last_strong_index
+        )
+        strong_time_reset = last_strong_index is not None and bars_since_strong > strong_window
+        strong_after_reset = strong_reset_after_signal or strong_time_reset
         hard_cooling = last_yellow_index is not None and bars_since_yellow <= hard_window
         after_same_trend = (
             last_yellow_index is not None
@@ -65,15 +82,19 @@ def yellow_permission_layer(
             and not after_reset
         )
         self_permission = not hard_cooling and not after_same_trend
-        strong_permission = (not bool(near_strong_track_signal.loc[index])) or after_reset
+        strong_permission = (not bool(near_strong_track_signal.loc[index])) or strong_after_reset
         display_permission = self_permission and strong_permission
         yellow_valid = bool(yellow_candidate.loc[index]) and display_permission
 
         rows.append(
             {
                 "near_strong_track_signal": bool(near_strong_track_signal.loc[index]),
+                "yellow_reset_after_signal": bool(yellow_reset_after_signal),
                 "yellow_time_reset": bool(time_reset),
                 "yellow_after_reset": bool(after_reset),
+                "strong_reset_after_signal": bool(strong_reset_after_signal),
+                "strong_time_reset": bool(strong_time_reset),
+                "strong_after_reset": bool(strong_after_reset),
                 "yellow_hard_cooling": bool(hard_cooling),
                 "yellow_after_same_trend": bool(after_same_trend),
                 "yellow_self_permission": bool(self_permission),
@@ -86,6 +107,12 @@ def yellow_permission_layer(
 
         if yellow_valid:
             last_yellow_index = position
+        if bool(strong_track_occupancy.loc[index]):
+            last_strong_index = position
+        if bool(yellow_reset_event.loc[index]):
+            last_yellow_reset_index = position
+        if bool(strong_reset_event.loc[index]):
+            last_strong_reset_index = position
 
     return pd.DataFrame(rows, index=yellow_candidate.index)
 
@@ -376,7 +403,8 @@ def add_a3b2b1_backgrounds(data: pd.DataFrame) -> pd.DataFrame:
     yellow_permissions = yellow_permission_layer(
         yellow_candidate=yellow_candidate_valid.fillna(False),
         strong_track_occupancy=strong_track_occupancy.fillna(False),
-        reset_shape=yellow_reset_shape.fillna(False),
+        yellow_reset_event=yellow_reset_shape.fillna(False),
+        strong_reset_event=yellow_reset_shape.fillna(False),
         strong_trend_running=strong_trend_running.fillna(False),
     )
     yellow_display_permission = yellow_permissions["yellow_display_permission"]
