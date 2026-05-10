@@ -1,0 +1,163 @@
+# Local Git Status At Handoff
+
+```text
+ M collaboration-guidelines.md
+ M current-checkpoint.md
+ M formula-changelog.md
+ M formula-discussion-summary.md
+ M formula_lab/a3b2b1.py
+ M formula_lab/data_service.py
+ M formula_lab/local_server.py
+ M formula_lab/validation_views.py
+ M github-mobile-sync/handoff-template.md
+ M long-term-anchors.md
+ M new-chat-handoff.md
+ M pending-verification-list.md
+ M project-index.md
+ M tests/test_a3b2b1_backgrounds.py
+ M tests/test_validation_views.py
+ M validation-indicator-index.md
+ M validation-indicator-plan.md
+ M "\346\226\207\344\273\266\350\257\264\346\230\216-\344\270\255\346\226\207\347\264\242\345\274\225.md"
+?? formula_lab/index_cache.py
+?? formula_lab/market_environment.py
+?? formula_lab/sell_v13.py
+?? generate-validation-A3b2-blue-yellow-source-mini.js
+?? generate-validation-A3b2a-source-trigger-mini.js
+?? generate-validation-A3b2b-break-bg-compare-mini.js
+?? generate-validation-A3b2b1-cross-only-bg-compare-mini.js
+?? github-mobile-sync/b-sell-v13/handoffs/20260511-055535/
+?? github-mobile-sync/sessions/
+?? index-cache-status.md
+?? market-environment-view-status.md
+?? next-session-resume.md
+?? scripts/audit_stock_cache_providers.py
+?? scripts/download_market_index_data.py
+?? scripts/generate_sell_v13_batch_review.py
+?? scripts/generate_sell_v13_non_confirmed_charts.py
+?? scripts/generate_sell_v13_non_confirmed_review.py
+?? scripts/generate_sell_v13_non_confirmed_source_diagnostics.py
+?? scripts/generate_sell_v13_validation_subchart.py
+?? scripts/generate_strong_hold_candidate_review.py
+?? scripts/generate_strong_hold_pullback_review.py
+?? scripts/generate_strong_reset_blocked_review.py
+?? scripts/generate_strong_reset_graph_reading.py
+?? scripts/generate_strong_reset_sample_review.py
+?? scripts/generate_yellow_reset_recontract_only_graphs.py
+?? scripts/generate_yellow_reset_recontract_time_graphs.py
+?? scripts/generate_yellow_reset_recontract_time_market_review.py
+?? scripts/generate_yellow_reset_recontract_time_review.py
+?? scripts/generate_yellow_reset_recontract_time_structure_market_review.py
+?? scripts/generate_yellow_reset_review.py
+?? scripts/merge_sell_v13_validation_outputs.py
+?? scripts/run_sell_v13_validation.py
+?? scripts/start_formula_lab.cmd
+?? scripts/start_formula_lab.ps1
+?? sell-formula-batch-validation-criteria.md
+?? sell-formula-batch-validation-field-map.md
+?? sell-formula-batch-validation-implementation-tasks.md
+?? sell-formula-v13-compatible-notes.md
+?? sell-formula-v13-draft.md
+?? sell-formula-v13-main.md
+?? sell-formula-validation-info-checklist.md
+?? sell-v13-b-cache200-latest-conclusion.md
+?? sell-v13-b-cache200-latest-non-confirmed-review.md
+?? sell-v13-b-cache200-latest-review.md
+?? sell-v13-b-cache200-latest-source-diagnostics.md
+?? sell-v13-b-current-checkpoint.md
+?? sell-v13-b-file-index.md
+?? sell-v13-b-latest-smoke-non-confirmed-review.md
+?? sell-v13-b-latest-smoke-review.md
+?? sell-v13-cache100-batch-review.md
+?? sell-v13-cache100-non-confirmed-review.md
+?? sell-v13-cache100b-batch-review.md
+?? sell-v13-cache100b-non-confirmed-review.md
+?? sell-v13-cache100b-part1-batch-review.md
+?? sell-v13-cache100b-part1-non-confirmed-review.md
+?? sell-v13-cache100b-part2-batch-review.md
+?? sell-v13-cache100b-part2-non-confirmed-review.md
+?? sell-v13-cache100b-part3-batch-review.md
+?? sell-v13-cache100b-part3-non-confirmed-review.md
+?? sell-v13-cache100b-part4-batch-review.md
+?? sell-v13-cache100b-part4-non-confirmed-review.md
+?? sell-v13-cache200-batch-review.md
+?? sell-v13-cache200-non-confirmed-review.md
+?? sell-v13-cache40-sensitive-review.md
+?? sell-v13-confirmation-density-review.md
+?? sell-v13-dynamic-ref-compatibility-test-notes.md
+?? sell-v13-dynamic-ref-compatibility-test.txt
+?? sell-v13-first-batch-review.md
+?? sell-v13-manual-observation-log.md
+?? sell-v13-minimum-field-output-review.md
+?? sell-v13-next-adjustment-candidates.md
+?? sell-v13-validation-label-rules.md
+?? sell-v13-validation-latest-status.md
+?? sell-v13-validation-subchart-1-display-copy-safe.txt
+?? sell-v13-validation-subchart-1-display-notes.md
+?? sell-v13-validation-subchart-1-display.txt
+?? sell-v13-validation-subchart-2-momentum-copy-safe.txt
+?? sell-v13-validation-subchart-2-momentum-notes.md
+?? sell-v13-validation-subchart-2-momentum.txt
+?? sell-v13-validation-subchart-3-funds-confirmation-copy-safe-v2-marker.txt
+?? sell-v13-validation-subchart-3-funds-confirmation-copy-safe.txt
+?? sell-v13-validation-subchart-3-funds-confirmation-notes.md
+?? sell-v13-validation-subchart-3-funds-confirmation.txt
+?? sell-v13-validation-subchart-4-structure-pattern-copy-safe.txt
+?? sell-v13-validation-subchart-4-structure-pattern-notes.md
+?? sell-v13-validation-subchart-4-structure-pattern.txt
+?? sell-v13-validation-subchart-partition-plan.md
+?? sell-v13-validation-subchart-test-instructions.md
+?? sell-v13-validation-view-minimum-fields.md
+?? stock-cache-provider-audit.md
+?? strong-hold-candidate-review.md
+?? strong-hold-pullback-review-offset-40-limit-40.md
+?? strong-hold-pullback-review.md
+?? strong-hold-visual-reading.md
+?? strong-reset-blocked-review.md
+?? strong-reset-graph-reading-summary.md
+?? strong-reset-permission-hold-plan.md
+?? strong-reset-release-sample-review.md
+?? tests/test_audit_stock_cache_providers.py
+?? tests/test_data_service.py
+?? tests/test_download_market_index_data.py
+?? tests/test_index_cache.py
+?? tests/test_local_server_market_environment.py
+?? tests/test_market_environment.py
+?? tests/test_merge_sell_v13_validation_outputs.py
+?? tests/test_sell_v13.py
+?? tests/test_sell_v13_batch_review.py
+?? tests/test_sell_v13_non_confirmed_charts.py
+?? tests/test_sell_v13_non_confirmed_review.py
+?? tests/test_sell_v13_non_confirmed_source_diagnostics.py
+?? tests/test_sell_v13_validation_subchart_generator.py
+?? tests/test_strong_hold_candidate_review.py
+?? tests/test_strong_hold_pullback_review.py
+?? tests/test_strong_reset_blocked_review.py
+?? tests/test_strong_reset_graph_reading.py
+?? tests/test_strong_reset_sample_report.py
+?? tests/test_yellow_reset_recontract_graphs.py
+?? tests/test_yellow_reset_recontract_time_graphs.py
+?? tests/test_yellow_reset_recontract_time_market_review.py
+?? tests/test_yellow_reset_recontract_time_review.py
+?? tests/test_yellow_reset_recontract_time_structure_market_review.py
+?? tests/test_yellow_reset_review.py
+?? validation-indicator-A3b2-blue-yellow-source-mini-draft.txt
+?? validation-indicator-A3b2a-source-trigger-mini-draft.txt
+?? validation-indicator-A3b2b-break-bg-compare-mini-draft.txt
+?? validation-indicator-A3b2b1-cross-only-bg-compare-mini-draft.txt
+?? yellow-after-reset-detail-plan.md
+?? yellow-recontract-quality-expanded-summary.md
+?? yellow-recontract-quality-plan.md
+?? yellow-reset-recontract-only-graphs.md
+?? yellow-reset-recontract-only-review.md
+?? yellow-reset-recontract-time-graphs.md
+?? yellow-reset-recontract-time-market-review.md
+?? yellow-reset-recontract-time-review.md
+?? yellow-reset-recontract-time-structure-market-review.md
+?? yellow-reset-recontract-visual-reading.md
+?? yellow-reset-review-offset-40-limit-40.md
+?? yellow-reset-review.md
+?? yellow-reset-risk-protection-candidate-note.md
+?? yellow-reset-risk-protection-readme.md
+?? yellow-same-trend-review.md
+```
