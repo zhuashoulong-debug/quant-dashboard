@@ -1,6 +1,6 @@
 # Download Status
 
-Snapshot time: `2026-05-11 14:50 +08:00`
+Snapshot time: `2026-05-11 14:54 +08:00`
 
 ## Rule
 
@@ -25,11 +25,11 @@ Process IDs can change after restart. On resume, identify by command line, not b
 
 - Manifest: `D:\我的文档\Documents\New project 3\data\raw\akshare\qfq\daily\download_manifest.jsonl`
 - Remaining batch: `1310`
-- Latest confirmed tail around snapshot: `index=40 / total=1310`
-- Latest confirmed code around snapshot: `603569`
+- Latest confirmed tail around snapshot: `index=55 / total=1310`
+- Latest confirmed code around snapshot: `603599`
 - Latest confirmed status: `downloaded`
-- Latest CSV around snapshot: `603569_20100101_20260509.csv`
-- CSV count around snapshot: `4247+`
+- Latest CSV around snapshot: `603599_20100101_20260509.csv`
+- CSV count around snapshot: `4263`
 
 ## Logs
 
