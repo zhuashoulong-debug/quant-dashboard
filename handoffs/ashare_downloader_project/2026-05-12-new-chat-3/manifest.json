@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source_device": "Codex desktop on Windows",
+  "source_session": "2026-05-11/new-chat-3",
+  "task_mainline": "大A数据源 / A股云端回测基准",
+  "timestamp": "2026-05-12",
+  "repo": "zhuashoulong-debug/quant-dashboard",
+  "github_folder": "handoffs/ashare_downloader_project/2026-05-12-new-chat-3/",
+  "local_project_root": "C:\\Users\\Administrator\\Documents\\Codex\\2026-05-11\\new-chat-3\\ashare_downloader_project",
+  "local_rules_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-05-11\\new-chat-3\\AGENTS.md",
+  "cloud_project_root": "/opt/projects/ashare_downloader_project/current",
+  "cloud_canonical_root": "/data/ashare/canonical",
+  "price_adjustment": "qfq",
+  "included_files": [
+    "README.md",
+    "manifest.json",
+    "new-chat-handoff-2026-05-12.md"
+  ],
+  "excluded_files": [
+    "secrets",
+    ".venv",
+    "storage",
+    "large logs",
+    "raw caches"
+  ],
+  "running_jobs": [
+    {
+      "type": "tmux",
+      "name": "ashare-qfq-full",
+      "status": "running",
+      "note": "Do not stop, restart, or modify without explicit user approval."
+    }
+  ],
+  "next_step": "Use cloud_status.ps1 or read-only tmux inspection to monitor ashare-qfq-full, then verify canonical qfq daily/weekly/monthly counts and manifest state after completion.",
+  "warnings": [
+    "Do not mix qfq front-adjusted data with none/unadjusted data.",
+    "Do not start a duplicate full download.",
+    "Do not modify /opt/a3b2/formula-project unless explicitly requested.",
+    "Do not overwrite older handoff packages."
+  ]
+}
