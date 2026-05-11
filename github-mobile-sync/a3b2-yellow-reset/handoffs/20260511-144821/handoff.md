@@ -75,14 +75,14 @@ Current status:
 
 ## Download Status Snapshot
 
-Snapshot time: `2026-05-11 14:50 +08:00`
+Snapshot time: `2026-05-11 14:54 +08:00`
 
 - Active downloader process exists.
 - Command includes `--resume-from-manifest --per-stock-timeout 90`.
 - Manifest has resumed into a `1310`-item remaining batch.
-- Latest confirmed manifest tail around snapshot: `index=40 / total=1310`, `code=603569`, `status=downloaded`.
-- CSV count around snapshot: about `4247+`.
-- Latest CSV around snapshot: `603569_20100101_20260509.csv`.
+- Latest confirmed manifest tail around snapshot: `index=55 / total=1310`, `code=603599`, `status=downloaded`.
+- CSV count around snapshot: about `4263`.
+- Latest CSV around snapshot: `603599_20100101_20260509.csv`.
 
 Logs:
 
